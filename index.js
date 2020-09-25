@@ -43,7 +43,7 @@ app.post('*', async (req, res) => {
   await new Promise(r => setTimeout(r, wait))
   app.websocket.clients.forEach(c => {
     if (c.name === name) {
-      c.send({ hello: name })
+      c.send(req.params)
     }
   })
 })
