@@ -12,7 +12,6 @@ var ws = new WebSocket('ws://localhost:3900')
 ws.onopen = function() {
   var data = JSON.stringify({ name: 'admin' })
   console.log('Registering:', data)
-  ws.send(data)
 }
 ws.onmessage = function(e) {
   console.log('Received data:', e.data)
