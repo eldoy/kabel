@@ -73,7 +73,10 @@ Alternatively you can use `curl`:
 
 #### Send a message to the browser via kabel
 ```
-# From terminal
+# From terminal using kabel
+kabel notify 'http://localhost:3900?name=app'
+
+# From terminal using curl
 curl -X POST -d 'name=app' http://localhost:3900
 ```
 Your app should now have reloaded.
