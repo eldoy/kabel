@@ -23,11 +23,11 @@ kabel -w 500
 # or with env variable
 KABEL_WAIT=500 kabel
 
-# Verbose output for output
-kabel -v
+# Quiet output
+kabel -q
 
 # or with env variable
-KABEL_VERBOSE=true
+KABEL_QUIET=0
 ```
 You only need one kabel server for all your apps.
 
@@ -50,15 +50,19 @@ Include this on in your web app:
 </script>
 ```
 
-#### Send a message to the browser via kabel
-```
-# From terminal
-curl -X POST -d 'name=app' http://localhost:3900
-```
-Your app should now have reloaded.
-
-#### Bonus: Automatic reload with nodemon
+#### Automatic reload with nodemon
 Create a `nodemon.json` file in your app root direcory that looks like this:
+kabel.js notify 'http://localhost:3900?name=cfhqadmin'
+```json
+{
+  "events": {
+    "restart": "kabel notify 'http://localhost:3900?name=app'"
+   }
+}
+```
+Your application will now reload every time nodemon restarts.
+
+Alternatively you can use `curl`:
 ```json
 {
   "events": {
@@ -66,7 +70,13 @@ Create a `nodemon.json` file in your app root direcory that looks like this:
    }
 }
 ```
-Your application will now reload every time nodemon restarts.
 
+#### Send a message to the browser via kabel
+```
+# From terminal
+curl -X POST -d 'name=app' http://localhost:3900
+```
+Your app should now have reloaded.
+
+### License
 MIT licensed. Enjoy!
-

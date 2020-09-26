@@ -1,8 +1,11 @@
 const Sirloin = require('sirloin')
+const isup = require('./lib/isup.js')
 
 const port = process.env.KABEL_PORT || 3900
-const wait = process.env.KABEL_WAIT || 300 // milliseconds
-const verbose = process.env.KABEL_VERBOSE || false
+const wait = process.env.KABEL_WAIT || 100 // milliseconds
+const quiet = !!parseInt(process.env.KABEL_QUIET) || false
+
+const DEBUG = false
 
 const app = new Sirloin({ port })
 
@@ -24,25 +27,37 @@ ws.onerror = function() {
 **/
 
 function log(...args) {
-  if (verbose) console.log(...args)
+  if (!quiet || DEBUG) console.log(...args)
 }
 
 app.action('*', async (data, client) => {
-  const { name } = data
-  if (!name) return
-  log('Registered app:', name)
+  log('* Websocket data received:\n', data)
+  let { name, host = client.req.headers.origin } = data
+  if (!name) {
+    return log('\n! Error: Name is missing from websocket data:\n', data)
+  }
+  log(`\n* Registered app\n  Name: ${name}\n  Host: ${host || 'NA'}`)
   client.name = name
+  client.host = host
 })
 
 app.post('*', async (req, res) => {
-  log('Message received:', req.params)
+  log('* Post params received:\n', req.params)
   const { name } = req.params
-  if (!name) return
-  log('App name:', name)
+  if (!name) {
+    return log('\n! Error: Name is missing from post params:\n', req.params)
+  }
+  log('Processing app:', name)
   await new Promise(r => setTimeout(r, wait))
-  app.websocket.clients.forEach(c => {
-    if (c.name === name) {
-      c.send(req.params)
+  for (const client of app.websocket.clients) {
+    if (client.name === name) {
+      if (client.host) {
+        log('\n* Waiting for server to restart...')
+        await isup({ url: client.host })
+        log(' done!')
+      }
+      client.send(req.params)
     }
-  })
+  }
+  return "OK"
 })
